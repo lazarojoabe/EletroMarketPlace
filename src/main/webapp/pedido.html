@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Pedido</title>
+</head>
+<body>
+
+<h2>Registrar Pedido</h2>
+
+<form action="/db_connection/pedido" method="post">
+
+    <label>ID do Produto:</label><br>
+    <input type="number" name="id_produto" required><br><br>
+
+    <label>ID do Vendedor:</label><br>
+    <input type="number" name="id_vendedor" required><br><br>
+
+    <label>Quantidade:</label><br>
+    <input type="number" name="quantidade" value="1" required><br><br>
+
+    <button type="submit">Salvar</button>
+</form>
+
+</body>
+</html>
