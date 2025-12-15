@@ -1,21 +1,175 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Cadastrar Vendedor</title>
+    <title>CRUD Vendedor</title>
+     <style>
+    /* Variáveis de Cor OTIMIZADAS */
+    :root {
+        --azul-eletro: #0077c7;       /* Azul principal (Buscar/Atualizar Padrão) */
+        --azul-hover: #004c8c;        /* Azul Escuro (HOVER: Buscar/Atualizar) */
+        --cor-fundo: #eef3f7;         
+        --cor-cartao: #ffffff;        
+        --cor-texto: #2c3e50;         
+        --cor-input-borda: #bdc3c7;   
+        
+        --cor-sucesso-padrao: #2ecc71;   /* Verde Padrão (Salvar) */
+        --cor-sucesso-hover: #23a85b;  /* Verde Mais Escuro (HOVER: Salvar) */
+        
+        --cor-alerta: #f39c12;        /* Laranja Padrão (Atualizar) */
+        
+        --cor-perigo-padrao: #e74c3c;    /* Vermelho Padrão (Excluir) */
+        --cor-perigo-hover: #c0392b;   /* Vermelho Mais Escuro (HOVER: Excluir) */
+        
+        --cor-clique-sutil: #888; /* Cinza escuro para feedback do clique */
+    }
+
+    body {
+        font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--cor-fundo);
+        color: var(--cor-texto);
+        margin: 0;
+        padding: 40px 20px;
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    /* Contêiner Principal e Estilos de Títulos/Formulários (Mantidos) */
+    .container {
+        width: 95%;
+        max-width: 750px;
+        background-color: var(--cor-cartao);
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    h1 { color: var(--azul-eletro); font-size: 2.8em; text-align: center; margin-bottom: 30px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    h2 { color: var(--cor-texto); font-size: 1.5em; margin-top: 35px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid var(--azul-eletro); font-weight: 500; }
+    form { background: linear-gradient(135deg, #ffffff 0%, #f7f7f7 100%); padding: 25px; border-radius: 10px; margin-bottom: 35px; border: 1px solid #e0e0e0; transition: box-shadow 0.3s; }
+    form:hover { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
+    input[type="text"], input[type="number"], input[type="email"], textarea {
+        width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--cor-input-borda); border-radius: 6px; box-sizing: border-box; font-size: 1em; color: var(--cor-texto); background-color: #fcfcfc;
+    }
+    input:focus, textarea:focus {
+        border-color: var(--azul-eletro); box-shadow: 0 0 5px rgba(0, 119, 199, 0.5); outline: none; background-color: var(--cor-cartao);
+    }
+
+    /* Estilo dos Botões - Padrão */
+    button[type="submit"] {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: background-color 0.3s, transform 0.1s;
+        width: auto;
+        min-width: 150px;
+        margin-top: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* --- CORES PADRÃO POR AÇÃO (Antes do mouse) --- */
+    
+    /* INSERT (Salvar) - Padrão Verde */
+    form[action$="insert"] button[type="submit"] {
+        background-color: var(--cor-sucesso-padrao);
+    }
+
+    /* UPDATE (Atualizar) - Padrão Laranja */
+    form[action$="update"] button[type="submit"] {
+        background-color: var(--cor-alerta);
+    }
+
+    /* DELETE (Excluir) - Padrão Vermelho */
+    form[action$="delete"] button[type="submit"] {
+        background-color: var(--cor-perigo-padrao);
+    }
+    
+    /* GET (Pesquisar) - Padrão Azul Claro */
+    form[action$="get"] button[type="submit"] {
+        background-color: var(--azul-eletro);
+    }
+
+
+    /* --- CORES AO PASSAR O MOUSE (:hover) --- */
+
+    /* Salvar (:hover) -> Deve ficar Verde Mais Escuro */
+    form[action$="insert"] button[type="submit"]:hover {
+        background-color: var(--cor-sucesso-hover);
+        transform: translateY(-2px); /* Efeito de elevação sutil */
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        opacity: 1; /* Garante que a opacidade não interfira */
+    }
+
+    /* Excluir (:hover) -> Deve ficar Vermelho Mais Escuro */
+    form[action$="delete"] button[type="submit"]:hover {
+        background-color: var(--cor-perigo-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        opacity: 1;
+    }
+
+    /* Buscar (:hover) -> Deve ficar Azul Escuro */
+    form[action$="get"] button[type="submit"]:hover {
+        background-color: var(--azul-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        opacity: 1;
+    }
+
+    /* Atualizar (:hover) -> Deve ficar Azul Escuro (Conforme solicitado) */
+    form[action$="update"] button[type="submit"]:hover {
+        background-color: var(--azul-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        opacity: 1;
+    }
+    
+    /* --- EFEITO AO CLICAR (:active) - Manter feedback sutil --- */
+    button[type="submit"]:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra mais sutil no clique */
+    }
+</style>
 </head>
 <body>
 
-<h2>Cadastrar Vendedor</h2>
+<h1>Vendedor</h1>
 
-<form action="/db_connection/vendedor" method="post">
-    <label>Nome:</label><br>
-    <input type="text" name="nome" required><br><br>
-
-    <label>Email:</label><br>
-    <input type="email" name="email" required><br><br>
-
+<h2>Inserir Vendedor</h2>
+<form action="vendedor" method="post">
+    <input type="hidden" name="action" value="insert">
+    <input type="text" name="nome" placeholder="Nome" required>
+    <input type="email" name="email" placeholder="Email" required>
     <button type="submit">Salvar</button>
+</form>
+
+<h2>Pesquisar Vendedor</h2>
+<form action="vendedor" method="get">
+    <input type="number" name="id_vendedor" placeholder="ID do vendedor">
+    <button type="submit">Pesquisar</button>
+</form>
+
+<h2>Atualizar Vendedor</h2>
+<form action="vendedor" method="post">
+    <input type="hidden" name="action" value="update">
+    <input type="number" name="id_vendedor" placeholder="ID" required>
+    <input type="text" name="nome" placeholder="Nome" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <button type="submit">Atualizar</button>
+</form>
+
+<h2>Excluir Vendedor</h2>
+<form action="vendedor" method="post">
+    <input type="hidden" name="action" value="delete">
+    <input type="number" name="id_vendedor" placeholder="ID" required>
+    <button type="submit">Excluir</button>
 </form>
 
 </body>
