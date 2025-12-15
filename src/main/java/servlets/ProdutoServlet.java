@@ -1,6 +1,8 @@
 package servlets;
 
 import java.io.IOException;
+import java.util.List; // Import necessário para a lista
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +14,7 @@ import model.Produto;
 
 @WebServlet("/produto")
 public class ProdutoServlet extends HttpServlet{
+	private static final long serialVersionUID = 1L; // Adicionado serialVersionUID
 	private ProdutoDAO produtoDAO;
 
 	public void init() throws ServletException{
@@ -21,16 +24,17 @@ public class ProdutoServlet extends HttpServlet{
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/html;charset=UTF-8");
-        
+		
 		String idParam = request.getParameter("id_produto");
-        
+		
 		if (idParam != null && !idParam.isEmpty()) {
+			// CENÁRIO 1: BUSCAR POR ID
 			try {
 				Long id = Long.parseLong(idParam);
 				Produto produto = produtoDAO.buscarPorId(id);
-                
+				
 				if (produto != null) {
-					// Exibe os detalhes do produto encontrado (ou redireciona para uma página de visualização)
+					// Exibe os detalhes do produto encontrado
 					response.getWriter().println("<!DOCTYPE html><html><head><title>Resultado da Pesquisa</title></head><body>");
 					response.getWriter().println("<h2> Produto Encontrado:</h2>");
 					response.getWriter().println("<ul>");
@@ -42,7 +46,7 @@ public class ProdutoServlet extends HttpServlet{
 					response.getWriter().println("<li><strong>ID Categoria:</strong> " + produto.getIdCategoria() + "</li>");
 					response.getWriter().println("<li><strong>ID Vendedor:</strong> " + produto.getIdVendedor() + "</li>");
 					response.getWriter().println("</ul>");
-					response.getWriter().println("<p><a href='/'>Voltar</a></p>"); // Altere para a URL correta do seu formulário
+					response.getWriter().println("<p><a href='/db_connection/produto'>Voltar para a Lista</a>"); // Link de volta ajustado
 					response.getWriter().println("</body></html>");
 				} else {
 					response.getWriter().println("Produto com ID " + id + " não encontrado.");
@@ -53,7 +57,56 @@ public class ProdutoServlet extends HttpServlet{
 				response.getWriter().println("Erro ao buscar o produto: " + e.getMessage());
 			}
 		} else {
-			response.getWriter().println("Por favor, forneça um ID de produto para pesquisar.");
+			// CENÁRIO 2: LISTAR TODOS OS PRODUTOS
+            try {
+                // É NECESSÁRIO implementar o método listarTodos() em ProdutoDAO
+                List<Produto> produtos = produtoDAO.listarTodos(); 
+
+                // Cabeçalho HTML com estilo para a tabela
+                response.getWriter().println("<!DOCTYPE html><html><head><title>Lista de Produtos</title>");
+                response.getWriter().println("<style>");
+                response.getWriter().println("body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f7f9; }");
+                response.getWriter().println(".container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }");
+                response.getWriter().println("h2 { color: #0077c7; border-bottom: 2px solid #0077c7; padding-bottom: 10px; }");
+                response.getWriter().println("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
+                response.getWriter().println("th, td { border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 0.9em; }");
+                response.getWriter().println("th { background-color: #0077c7; color: white; font-weight: bold; }");
+                response.getWriter().println("tr:nth-child(even) { background-color: #f9f9f9; }");
+                response.getWriter().println("a { color: #0077c7; text-decoration: none; margin-right: 15px; }");
+                response.getWriter().println("a:hover { text-decoration: underline; }");
+                response.getWriter().println("</style>");
+                response.getWriter().println("</head><body>");
+                response.getWriter().println("<div class='container'>");
+                response.getWriter().println("<h2>Lista de Todos os Produtos</h2>");
+
+                if (produtos == null || produtos.isEmpty()) {
+                    response.getWriter().println("<p>Nenhum produto cadastrado.</p>");
+                } else {
+                    response.getWriter().println("<table>");
+                    response.getWriter().println("<thead><tr><th>ID</th><th>Nome</th><th>Descrição</th><th>Preço</th><th>Estoque</th><th>ID Categoria</th><th>ID Vendedor</th></tr></thead>");
+                    response.getWriter().println("<tbody>");
+                    
+                    for (Produto p : produtos) {
+                        response.getWriter().println("<tr>");
+                        response.getWriter().println("<td>" + p.getIdProduto() + "</td>");
+                        response.getWriter().println("<td>" + p.getNome() + "</td>");
+                        response.getWriter().println("<td>" + p.getDescricao() + "</td>");
+                        response.getWriter().println("<td>R$ " + String.format("%.2f", p.getPreco()) + "</td>");
+                        response.getWriter().println("<td>" + p.getEstoque() + "</td>");
+                        response.getWriter().println("<td>" + p.getIdCategoria() + "</td>");
+                        response.getWriter().println("<td>" + p.getIdVendedor() + "</td>");
+                        response.getWriter().println("</tr>");
+                    }
+                    
+                    response.getWriter().println("</tbody></table>");
+                }
+                response.getWriter().println("<p style='margin-top: 20px;'><a href='/db_connection/indexProduto.html'>Voltar ao CRUD</a></p>"); // Link ajustado
+                response.getWriter().println("</div>");
+                response.getWriter().println("</body></html>");
+
+            } catch (Exception e) {
+                response.getWriter().println("Erro ao listar produtos: " + e.getMessage());
+            }
 		}
 	}
 
@@ -132,10 +185,12 @@ public class ProdutoServlet extends HttpServlet{
 
 		// 2. Atualizar APENAS os campos fornecidos pelo formulário
 		p.setNome(nome);
+		// Manter a descrição original, pois não está no formulário de update
+		// p.setDescricao(descricao); 
 		p.setPreco(preco);
 		p.setEstoque(estoque);
-
-        
+        // Manter ID Categoria e Vendedor originais
+		
         // 3. Persistir a atualização
 		if (produtoDAO.atualizar(p)) {
 			return "Produto Atualizado com sucesso!";

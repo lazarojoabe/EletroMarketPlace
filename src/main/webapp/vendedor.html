@@ -57,8 +57,8 @@
         border-color: var(--azul-eletro); box-shadow: 0 0 5px rgba(0, 119, 199, 0.5); outline: none; background-color: var(--cor-cartao);
     }
 
-    /* Estilo dos Botões - Padrão */
-    button[type="submit"] {
+    /* Estilo dos Botões e Links - Padrão */
+    button[type="submit"], .btn-link-listar {
         padding: 12px 25px;
         border: none;
         border-radius: 8px;
@@ -72,6 +72,9 @@
         min-width: 150px;
         margin-top: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-decoration: none; /* Para links */
+        display: inline-block; /* Para links */
+        text-align: center;
     }
 
     /* --- CORES PADRÃO POR AÇÃO (Antes do mouse) --- */
@@ -91,8 +94,9 @@
         background-color: var(--cor-perigo-padrao);
     }
     
-    /* GET (Pesquisar) - Padrão Azul Claro */
-    form[action$="get"] button[type="submit"] {
+    /* GET (Pesquisar/Listar) - Padrão Azul Claro */
+    form[action$="get"] button[type="submit"],
+    .btn-link-listar {
         background-color: var(--azul-eletro);
     }
 
@@ -102,9 +106,8 @@
     /* Salvar (:hover) -> Deve ficar Verde Mais Escuro */
     form[action$="insert"] button[type="submit"]:hover {
         background-color: var(--cor-sucesso-hover);
-        transform: translateY(-2px); /* Efeito de elevação sutil */
+        transform: translateY(-2px); 
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1; /* Garante que a opacidade não interfira */
     }
 
     /* Excluir (:hover) -> Deve ficar Vermelho Mais Escuro */
@@ -112,38 +115,37 @@
         background-color: var(--cor-perigo-hover);
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1;
     }
 
-    /* Buscar (:hover) -> Deve ficar Azul Escuro */
-    form[action$="get"] button[type="submit"]:hover {
+    /* Buscar / Listar (:hover) -> Deve ficar Azul Escuro */
+    form[action$="get"] button[type="submit"]:hover,
+    .btn-link-listar:hover {
         background-color: var(--azul-hover);
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1;
     }
 
-    /* Atualizar (:hover) -> Deve ficar Azul Escuro (Conforme solicitado) */
+    /* Atualizar (:hover) -> Deve ficar Azul Escuro */
     form[action$="update"] button[type="submit"]:hover {
         background-color: var(--azul-hover);
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1;
     }
     
     /* --- EFEITO AO CLICAR (:active) - Manter feedback sutil --- */
-    button[type="submit"]:active {
+    button[type="submit"]:active, .btn-link-listar:active {
         transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra mais sutil no clique */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 </style>
 </head>
 <body>
+<div class="container">
 
 <h1>Vendedor</h1>
 
 <h2>Inserir Vendedor</h2>
-<form action="vendedor" method="post">
+<form action="/EletroMarketPlace/vendedor" method="post">
     <input type="hidden" name="action" value="insert">
     <input type="text" name="nome" placeholder="Nome" required>
     <input type="email" name="email" placeholder="Email" required>
@@ -151,26 +153,36 @@
 </form>
 
 <h2>Pesquisar Vendedor</h2>
-<form action="vendedor" method="get">
-    <input type="number" name="id_vendedor" placeholder="ID do vendedor">
+<form action="/EletroMarketPlace/vendedor" method="get">
+    <input type="number" name="id_vendedor" placeholder="ID do vendedor" required>
     <button type="submit">Pesquisar</button>
 </form>
 
 <h2>Atualizar Vendedor</h2>
-<form action="vendedor" method="post">
+<form action="/EletroMarketPlace/vendedor" method="post">
     <input type="hidden" name="action" value="update">
     <input type="number" name="id_vendedor" placeholder="ID" required>
-    <input type="text" name="nome" placeholder="Nome" required>
-    <input type="email" name="email" placeholder="Email" required>
+    <input type="text" name="nome" placeholder="Novo Nome" required>
+    <input type="email" name="email" placeholder="Novo Email" required>
     <button type="submit">Atualizar</button>
 </form>
 
 <h2>Excluir Vendedor</h2>
-<form action="vendedor" method="post">
+<form action="/EletroMarketPlace/vendedor" method="post">
     <input type="hidden" name="action" value="delete">
     <input type="number" name="id_vendedor" placeholder="ID" required>
     <button type="submit">Excluir</button>
 </form>
 
+<hr>
+
+<h2>Listar Todos os Vendedores</h2>
+<p>
+    <a href="/EletroMarketPlace/vendedor" class="btn-link-listar">
+        Visualizar Todos
+    </a>
+</p>
+
+</div>
 </body>
 </html>

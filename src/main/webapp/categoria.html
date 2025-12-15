@@ -38,7 +38,7 @@
         min-height: 100vh;
     }
 
-    /* Contêiner Principal e Estilos de Títulos/Formulários (Mantidos) */
+    /* Contêiner Principal e Estilos de Títulos/Formulários */
     .container {
         width: 95%;
         max-width: 750px;
@@ -59,7 +59,7 @@
     }
 
     /* Estilo dos Botões - Padrão */
-    button[type="submit"] {
+    .btn-submit, .btn-link {
         padding: 12px 25px;
         border: none;
         border-radius: 8px;
@@ -73,27 +73,31 @@
         min-width: 150px;
         margin-top: 10px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-decoration: none; /* Para links */
+        display: inline-block; /* Para links */
+        text-align: center;
     }
 
     /* --- CORES PADRÃO POR AÇÃO (Antes do mouse) --- */
     
     /* INSERT (Salvar) - Padrão Verde */
-    form[action$="insert"] button[type="submit"] {
+    form[action$="insert"] .btn-submit {
         background-color: var(--cor-sucesso-padrao);
     }
 
     /* UPDATE (Atualizar) - Padrão Laranja */
-    form[action$="update"] button[type="submit"] {
+    form[action$="update"] .btn-submit {
         background-color: var(--cor-alerta);
     }
 
     /* DELETE (Excluir) - Padrão Vermelho */
-    form[action$="delete"] button[type="submit"] {
+    form[action$="delete"] .btn-submit {
         background-color: var(--cor-perigo-padrao);
     }
     
-    /* GET (Pesquisar) - Padrão Azul Claro */
-    form[action$="get"] button[type="submit"] {
+    /* GET (Pesquisar/Listar) - Padrão Azul Claro */
+    form[method="get"] .btn-submit,
+    .btn-link-listar {
         background-color: var(--azul-eletro);
     }
 
@@ -101,75 +105,83 @@
     /* --- CORES AO PASSAR O MOUSE (:hover) --- */
 
     /* Salvar (:hover) -> Deve ficar Verde Mais Escuro */
-    form[action$="insert"] button[type="submit"]:hover {
+    form[action$="insert"] .btn-submit:hover {
         background-color: var(--cor-sucesso-hover);
-        transform: translateY(-2px); /* Efeito de elevação sutil */
+        transform: translateY(-2px); 
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1; /* Garante que a opacidade não interfira */
     }
 
     /* Excluir (:hover) -> Deve ficar Vermelho Mais Escuro */
-    form[action$="delete"] button[type="submit"]:hover {
+    form[action$="delete"] .btn-submit:hover {
         background-color: var(--cor-perigo-hover);
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1;
     }
 
-    /* Buscar (:hover) -> Deve ficar Azul Escuro */
-    form[action$="get"] button[type="submit"]:hover {
+    /* Buscar / Listar (:hover) -> Deve ficar Azul Escuro */
+    form[method="get"] .btn-submit:hover,
+    .btn-link-listar:hover {
         background-color: var(--azul-hover);
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1;
     }
 
-    /* Atualizar (:hover) -> Deve ficar Azul Escuro (Conforme solicitado) */
-    form[action$="update"] button[type="submit"]:hover {
+    /* Atualizar (:hover) -> Deve ficar Azul Escuro */
+    form[action$="update"] .btn-submit:hover {
         background-color: var(--azul-hover);
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        opacity: 1;
     }
     
-    /* --- EFEITO AO CLICAR (:active) - Manter feedback sutil --- */
-    button[type="submit"]:active {
+    /* --- EFEITO AO CLICAR (:active) --- */
+    .btn-submit:active, .btn-link-listar:active {
         transform: translateY(0);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra mais sutil no clique */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 </style>
 </head>
 <body>
+<div class="container">
 
-<h1>Categoria</h1>
+<h1>Gerenciamento de Categoria</h1>
 
 <h2>Inserir Categoria</h2>
-<form action="/db_connection/categoria" method="post">
+<form action="/EletroMarketPlace/categoria" method="post">
     <input type="hidden" name="action" value="insert">
     <input type="text" name="nome" placeholder="Nome da categoria" required>
-    <button type="submit">Salvar</button>
+    <button type="submit" class="btn-submit">Salvar</button>
 </form>
 
-<h2>Pesquisar Categoria</h2>
-<form action="/db_connection/categoria" method="get">
-    <input type="number" name="id_categoria" placeholder="ID da categoria">
-    <button type="submit">Pesquisar</button>
+<h2>Pesquisar Categoria por ID</h2>
+<form action="/EletroMarketPlace/categoria" method="get">
+    <input type="number" name="id_categoria" placeholder="ID da categoria" required>
+    <button type="submit" class="btn-submit">Pesquisar</button>
 </form>
 
 <h2>Atualizar Categoria</h2>
-<form action="/db_connection/categoria" method="post">
+<form action="/EletroMarketPlace/categoria" method="post">
     <input type="hidden" name="action" value="update">
-    <input type="number" name="id_categoria" placeholder="ID" required>
-    <input type="text" name="nome" placeholder="Novo nome" required>
-    <button type="submit">Atualizar</button>
+    <input type="number" name="id_categoria" placeholder="ID para atualizar" required>
+    <input type="text" name="nome" placeholder="Novo nome da categoria" required>
+    <button type="submit" class="btn-submit">Atualizar</button>
 </form>
 
 <h2>Excluir Categoria</h2>
-<form action="/db_connection/categoria" method="post">
+<form action="/EletroMarketPlace/categoria" method="post">
     <input type="hidden" name="action" value="delete">
-    <input type="number" name="id_categoria" placeholder="ID" required>
-    <button type="submit">Excluir</button>
+    <input type="number" name="id_categoria" placeholder="ID para excluir" required>
+    <button type="submit" class="btn-submit">Excluir</button>
 </form>
 
+<hr>
+
+<h2>Listar Todas as Categorias</h2>
+<p>
+    <a href="/EletroMarketPlace/categoria" class="btn-link-listar">
+        Visualizar Todas
+    </a>
+</p>
+
+</div>
 </body>
 </html>
