@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -56,7 +57,7 @@ public class CategoriaServlet extends HttpServlet {
                 }
             }
         } catch (Exception e) { mensagem = "Erro: " + e.getMessage(); }
-        response.getWriter().println("<h3>Resultado:</h3><p>" + mensagem + "</p><a href='/EletroMarketPlace/categoria.html'>Voltar</a>");
+        response.getWriter().println("<h3>Resultado:</h3><p>" + mensagem + "</p><a href='categoria.html'>Voltar</a>");
     }
 
     private void buscarPorId(HttpServletRequest request, HttpServletResponse response, String idParam) throws IOException {
@@ -71,11 +72,24 @@ public class CategoriaServlet extends HttpServlet {
 
     private void listarTodas(HttpServletRequest request, HttpServletResponse response) throws IOException {
         List<Categoria> lista = catDao.listarTodas();
-        response.getWriter().println("<h2>Categorias</h2><table border='1'>");
+        PrintWriter out = response.getWriter();
+        out.println("<!DOCTYPE html><html><head><title>Categorias</title>");
+        out.println("<style>");
+        out.println("body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #eef3f7; padding: 40px; display: flex; justify-content: center; }");
+        out.println(".container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }");
+        out.println("h2 { color: #0077c7; border-bottom: 2px solid #0077c7; padding-bottom: 10px; margin-top: 0; }");
+        out.println("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
+        out.println("th { background-color: #0077c7; color: white; padding: 12px; text-align: left; }");
+        out.println("td { padding: 12px; border-bottom: 1px solid #eee; color: #2c3e50; }");
+        out.println("tr:hover { background-color: #f1f7fc; }");
+        out.println(".btn { display: inline-block; margin-top: 25px; padding: 10px 20px; background: #0077c7; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; }");
+        out.println("</style></head><body>");
+        out.println("<div class='container'><h2>Categorias Cadastradas</h2>");
+        out.println("<table><tr><th>ID</th><th>Nome da Categoria</th></tr>");
         for (Categoria c : lista) {
-            response.getWriter().println("<tr><td>" + c.getIdCategoria() + "</td><td>" + c.getNome() + "</td></tr>");
+            out.println("<tr><td>" + c.getIdCategoria() + "</td><td>" + c.getNome() + "</td></tr>");
         }
-        response.getWriter().println("</table><br><a href='/EletroMarketPlace/categoria.html'>Voltar</a>");
+        out.println("</table><a href='categoria.html' class='btn'>← Voltar ao CRUD</a></div></body></html>");
     }
 
     private String inserirCategoria(HttpServletRequest request) {

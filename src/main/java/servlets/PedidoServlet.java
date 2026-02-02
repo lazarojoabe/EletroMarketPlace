@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -71,11 +72,24 @@ public class PedidoServlet extends HttpServlet {
 
     private void listarTodos(HttpServletRequest request, HttpServletResponse response) throws IOException {
         List<Pedido> lista = pedidoDAO.listarTodos();
-        response.getWriter().println("<h2>Pedidos</h2><table border='1'>");
+        PrintWriter out = response.getWriter();
+        out.println("<!DOCTYPE html><html><head><title>Pedidos</title>");
+        out.println("<style>");
+        out.println("body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef3f7; padding: 40px; }");
+        out.println(".container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 950px; margin: auto; }");
+        out.println("h2 { color: #0077c7; margin-bottom: 20px; }");
+        out.println("table { width: 100%; border-collapse: collapse; }");
+        out.println("th { background: #f8f9fa; color: #0077c7; padding: 15px; text-align: left; border-bottom: 3px solid #0077c7; }");
+        out.println("td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }");
+        out.println("tr:nth-child(even) { background: #fafafa; }");
+        out.println(".btn-nav { display: block; margin-top: 25px; text-align: center; color: #0077c7; text-decoration: none; font-weight: bold; }");
+        out.println("</style></head><body>");
+        out.println("<div class='container'><h2>Histórico de Pedidos</h2>");
+        out.println("<table><tr><th>ID Pedido</th><th>ID Produto</th><th>ID Vendedor</th><th>Quantidade</th><th>Data do Registro</th></tr>");
         for (Pedido p : lista) {
-            response.getWriter().println("<tr><td>" + p.getIdPedido() + "</td><td>" + p.getQuantidade() + "</td></tr>");
+            out.println("<tr><td>#" + p.getIdPedido() + "</td><td>" + p.getIdProduto() + "</td><td>" + p.getIdVendedor() + "</td><td>" + p.getQuantidade() + "</td><td>" + p.getDataPedido() + "</td></tr>");
         }
-        response.getWriter().println("</table><br><a href='/EletroMarketPlace/pedido.html'>Voltar</a>");
+        out.println("</table><a href='pedido.html' class='btn-nav'>Voltar ao CRUD de Pedidos</a></div></body></html>");
     }
 
     private String inserirPedido(HttpServletRequest request) {

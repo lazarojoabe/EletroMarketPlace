@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -71,11 +72,24 @@ public class VendedorServlet extends HttpServlet {
 
     private void listarTodos(HttpServletRequest request, HttpServletResponse response) throws IOException {
         List<Vendedor> lista = vendedorDAO.listarTodos();
-        response.getWriter().println("<h2>Vendedores</h2><table border='1'>");
+        PrintWriter out = response.getWriter();
+        out.println("<!DOCTYPE html><html><head><title>Vendedores</title>");
+        out.println("<style>");
+        out.println("body { font-family: 'Segoe UI', sans-serif; background-color: #f0f4f8; padding: 40px; }");
+        out.println(".card { background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 800px; margin: auto; }");
+        out.println("h2 { color: #0077c7; font-weight: 600; }");
+        out.println("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
+        out.println("th { color: #555; text-align: left; padding: 15px; border-bottom: 2px solid #0077c7; }");
+        out.println("td { padding: 15px; border-bottom: 1px solid #f0f0f0; color: #444; }");
+        out.println("tr:hover { background: #fcfdfe; }");
+        out.println(".btn-voltar { display: inline-block; margin-top: 20px; color: #0077c7; text-decoration: none; font-weight: 500; }");
+        out.println("</style></head><body>");
+        out.println("<div class='card'><h2>Vendedores Ativos</h2>");
+        out.println("<table><tr><th>ID</th><th>Nome Completo</th><th>E-mail de Contato</th></tr>");
         for (Vendedor v : lista) {
-            response.getWriter().println("<tr><td>" + v.getIdVendedor() + "</td><td>" + v.getNome() + "</td></tr>");
+            out.println("<tr><td>" + v.getIdVendedor() + "</td><td>" + v.getNome() + "</td><td>" + v.getEmail() + "</td></tr>");
         }
-        response.getWriter().println("</table><br><a href='/EletroMarketPlace/vendedor.html'>Voltar</a>");
+        out.println("</table><a href='vendedor.html' class='btn-voltar'>← Voltar para Gestão</a></div></body></html>");
     }
 
     private String inserirVendedor(HttpServletRequest request) {

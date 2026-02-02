@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -71,11 +72,24 @@ public class ProdutoServlet extends HttpServlet {
 
     private void listarTodos(HttpServletRequest request, HttpServletResponse response) throws IOException {
         List<Produto> lista = produtoDAO.listarTodos();
-        response.getWriter().println("<h2>Produtos</h2><table border='1'>");
+        PrintWriter out = response.getWriter();
+        out.println("<!DOCTYPE html><html><head><title>Lista de Produtos</title>");
+        out.println("<style>");
+        out.println("body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #eef3f7; padding: 40px; }");
+        out.println(".card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 900px; margin: auto; }");
+        out.println("h2 { color: #0077c7; border-bottom: 2px solid #0077c7; padding-bottom: 10px; }");
+        out.println("table { width: 100%; border-collapse: collapse; margin-top: 20px; }");
+        out.println("th { background-color: #0077c7; color: white; padding: 12px; text-align: left; }");
+        out.println("td { padding: 12px; border-bottom: 1px solid #ddd; color: #2c3e50; }");
+        out.println("tr:hover { background-color: #f1f7fc; }");
+        out.println(".btn-back { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #0077c7; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; }");
+        out.println("</style></head><body>");
+        out.println("<div class='card'><h2>Estoque de Produtos</h2>");
+        out.println("<table><tr><th>ID</th><th>Nome</th><th>Preço</th><th>Estoque</th></tr>");
         for (Produto p : lista) {
-            response.getWriter().println("<tr><td>" + p.getIdProduto() + "</td><td>" + p.getNome() + "</td></tr>");
+            out.println("<tr><td>" + p.getIdProduto() + "</td><td>" + p.getNome() + "</td><td>R$ " + String.format("%.2f", p.getPreco()) + "</td><td>" + p.getEstoque() + "</td></tr>");
         }
-        response.getWriter().println("</table><br><a href='/EletroMarketPlace/produto.html'>Voltar</a>");
+        out.println("</table><a href='produto.html' class='btn-back'>Voltar ao Cadastro</a></div></body></html>");
     }
 
     private String inserirProduto(HttpServletRequest request) {
