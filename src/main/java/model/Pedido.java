@@ -8,7 +8,10 @@ public class Pedido {
     private Long idVendedor;
     private int quantidade;
     private Timestamp dataPedido;
-
+    private String nomeProduto;
+    private String nomeVendedor;
+    
+    
     public Pedido() {}
 
     public Pedido(Long idProduto, Long idVendedor, int quantidade) {
@@ -32,6 +35,10 @@ public class Pedido {
     public Timestamp getDataPedido() { return dataPedido; }
     public void setDataPedido(Timestamp dataPedido) { this.dataPedido = dataPedido; }
 
+    public String getNomeProduto() { return nomeProduto; }
+    public void setNomeProduto(String nomeProduto) { this.nomeProduto = nomeProduto; }
+    public String getNomeVendedor() { return nomeVendedor; }
+    public void setNomeVendedor(String nomeVendedor) { this.nomeVendedor = nomeVendedor; }
     @Override
     public String toString() {
         return "Pedido{id=" + idPedido + ", produto=" + idProduto + ", qtd=" + quantidade + "}";

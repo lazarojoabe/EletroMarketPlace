@@ -86,21 +86,36 @@ public class PedidoDAO {
     }
 
     public List<Pedido> listarTodos() {
-        String sql = "SELECT * FROM pedidos ORDER BY data_pedido DESC";
+        String sql = "SELECT p.*, prod.nome AS nome_produto, vend.nome AS nome_vendedor " +
+                     "FROM pedidos p " +
+                     "LEFT JOIN produtos prod ON p.id_produto = prod.id_produto " +
+                     "LEFT JOIN vendedores vend ON p.id_vendedor = vend.id_vendedor " +
+                     "ORDER BY p.data_pedido DESC";
+        
         List<Pedido> lista = new ArrayList<>();
-
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) lista.add(extrairPedido(rs));
-
+            while (rs.next()) {
+                Pedido p = new Pedido();
+                p.setIdPedido(rs.getLong("id_pedido"));
+                p.setIdProduto(rs.getLong("id_produto"));
+                p.setIdVendedor(rs.getLong("id_vendedor"));
+                p.setQuantidade(rs.getInt("quantidade"));
+                p.setDataPedido(rs.getTimestamp("data_pedido"));
+                
+                // Atribui os nomes vindos do JOIN
+                p.setNomeProduto(rs.getString("nome_produto"));
+                p.setNomeVendedor(rs.getString("nome_vendedor"));
+                
+                lista.add(p);
+            }
         } catch (SQLException e) {
-            System.err.println("Erro ao listar pedidos: " + e.getMessage());
+            System.err.println("Erro ao listar pedidos completos: " + e.getMessage());
         }
         return lista;
     }
-
     public List<Pedido> listarPorVendedor(Long idVendedor) {
         String sql = "SELECT * FROM pedidos WHERE id_vendedor = ?";
         List<Pedido> lista = new ArrayList<>();

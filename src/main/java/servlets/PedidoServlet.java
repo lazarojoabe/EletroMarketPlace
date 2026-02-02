@@ -73,23 +73,43 @@ public class PedidoServlet extends HttpServlet {
     private void listarTodos(HttpServletRequest request, HttpServletResponse response) throws IOException {
         List<Pedido> lista = pedidoDAO.listarTodos();
         PrintWriter out = response.getWriter();
-        out.println("<!DOCTYPE html><html><head><title>Pedidos</title>");
+        
+        out.println("<!DOCTYPE html><html><head><title>Relatório de Pedidos</title>");
         out.println("<style>");
         out.println("body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef3f7; padding: 40px; }");
-        out.println(".container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 950px; margin: auto; }");
+        out.println(".container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 1050px; margin: auto; }");
         out.println("h2 { color: #0077c7; margin-bottom: 20px; }");
         out.println("table { width: 100%; border-collapse: collapse; }");
-        out.println("th { background: #f8f9fa; color: #0077c7; padding: 15px; text-align: left; border-bottom: 3px solid #0077c7; }");
-        out.println("td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }");
+        out.println("th { background: #f8f9fa; color: #0077c7; padding: 15px; text-align: left; border-bottom: 3px solid #0077c7; text-transform: uppercase; font-size: 12px; }");
+        out.println("td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; color: #2c3e50; }");
         out.println("tr:nth-child(even) { background: #fafafa; }");
+        out.println("tr:hover { background: #f1f7fc; }");
         out.println(".btn-nav { display: block; margin-top: 25px; text-align: center; color: #0077c7; text-decoration: none; font-weight: bold; }");
+        out.println(".null-info { color: #95a5a6; font-style: italic; font-size: 12px; }");
         out.println("</style></head><body>");
-        out.println("<div class='container'><h2>Histórico de Pedidos</h2>");
-        out.println("<table><tr><th>ID Pedido</th><th>ID Produto</th><th>ID Vendedor</th><th>Quantidade</th><th>Data do Registro</th></tr>");
+        
+        out.println("<div class='container'><h2>Relatório Geral de Vendas</h2>");
+        out.println("<table><thead><tr>");
+        out.println("<th>ID Pedido</th><th>Produto</th><th>Vendedor</th><th>Quantidade</th><th>Data do Registro</th>");
+        out.println("</tr></thead><tbody>");
+
         for (Pedido p : lista) {
-            out.println("<tr><td>#" + p.getIdPedido() + "</td><td>" + p.getIdProduto() + "</td><td>" + p.getIdVendedor() + "</td><td>" + p.getQuantidade() + "</td><td>" + p.getDataPedido() + "</td></tr>");
+            // Lógica para tratar produtos ou vendedores deletados (SET NULL)
+            String nomeProd = (p.getNomeProduto() != null) ? p.getNomeProduto() : "<span class='null-info'>Produto Removido</span>";
+            String nomeVend = (p.getNomeVendedor() != null) ? p.getNomeVendedor() : "<span class='null-info'>Vendedor Inativo</span>";
+
+            out.println("<tr>");
+            out.println("<td><strong>#" + p.getIdPedido() + "</strong></td>");
+            out.println("<td>" + nomeProd + "</td>");
+            out.println("<td>" + nomeVend + "</td>");
+            out.println("<td>" + p.getQuantidade() + "</td>");
+            out.println("<td>" + p.getDataPedido() + "</td>");
+            out.println("</tr>");
         }
-        out.println("</table><a href='pedido.html' class='btn-nav'>Voltar ao CRUD de Pedidos</a></div></body></html>");
+
+        out.println("</tbody></table>");
+        out.println("<a href='pedido.html' class='btn-nav'>Voltar ao Gerenciamento</a>");
+        out.println("</div></body></html>");
     }
 
     private String inserirPedido(HttpServletRequest request) {
