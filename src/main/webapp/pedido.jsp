@@ -16,8 +16,8 @@
         </div>
         
         <div style="display: flex; gap: 10px;">
+            <input type="number" name="id_categoria" placeholder="ID da Categoria" required style="flex: 1;">
             <input type="number" name="quantidade" placeholder="Quantidade" required style="flex: 1;">
-            <input type="text" name="data_pedido" placeholder="Data (AAAA-MM-DD)" required style="flex: 1;">
         </div>
         
         <button type="submit" style="background-color: var(--success, #28a745); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase;">
@@ -33,7 +33,7 @@
         </button>
     </form>
 
-    <h2>Atualizar Pedido</h2>
+    <h2>Atualizar Quantidade</h2>
     <form action="pedido" method="post">
         <input type="hidden" name="action" value="update">
         <div style="display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap;">
@@ -46,18 +46,20 @@
         </div>
     </form>
 
-    <h2>Cancelar Pedido</h2>
-    <form action="pedido" method="post" style="display: flex; gap: 10px;">
+    <h2>Remover do Histórico</h2>
+    <form action="pedido" method="post" style="display: flex; flex-direction: column; gap: 10px;">
         <input type="hidden" name="action" value="delete">
-        <input type="number" name="id_pedido" placeholder="ID do pedido para cancelar..." required style="flex: 3;">
-        <button type="submit" style="background-color: var(--danger, #dc3545); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; flex: 1; font-weight: bold; text-transform: uppercase;">
-            Excluir
-        </button>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" name="id_pedido" placeholder="ID do pedido para remover..." required style="flex: 3;">
+            <button type="submit" style="background-color: var(--danger, #dc3545); color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; flex: 1; font-weight: bold; text-transform: uppercase;">
+                Excluir
+            </button>
+        </div>
     </form>
 
     <div style="margin-top: 20px;">
         <a href="pedido" style="background-color: var(--primary, #007bff); color: white; padding: 12px; text-decoration: none; border-radius: 8px; display: block; text-align: center; font-weight: bold; text-transform: uppercase;">
-            Listar Todos os Pedidos
+            Visualizar Todos os Pedidos
         </a>
     </div>
 
