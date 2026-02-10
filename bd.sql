@@ -1,27 +1,28 @@
--- Reinicia o banco de dados para aplicar as novas regras
 DROP DATABASE IF EXISTS eletro_marketplace;
 CREATE DATABASE eletro_marketplace;
 USE eletro_marketplace;
 
 -- ============================
--- TABELA CATEGORIAS
+-- TABELA CATEGORIAS (Adicionado campo 'ativo')
 -- ============================
 CREATE TABLE categorias (
     id_categoria BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL
+    nome VARCHAR(150) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE -- Flag de Soft Delete
 );
 
 -- ============================
--- TABELA VENDEDORES
+-- TABELA VENDEDORES (Adicionado campo 'ativo')
 -- ============================
 CREATE TABLE vendedores (
     id_vendedor BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
-    email VARCHAR(200) UNIQUE NOT NULL
+    email VARCHAR(200) UNIQUE NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE -- Flag de Soft Delete
 );
 
 -- ============================
--- TABELA PRODUTOS
+-- TABELA PRODUTOS (Adicionado campo 'ativo')
 -- ============================
 CREATE TABLE produtos (
     id_produto BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -32,16 +33,10 @@ CREATE TABLE produtos (
     id_categoria BIGINT UNSIGNED NOT NULL,
     id_vendedor BIGINT UNSIGNED NOT NULL,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ativo BOOLEAN DEFAULT TRUE, -- Flag de Soft Delete
 
-    FOREIGN KEY (id_categoria)
-        REFERENCES categorias(id_categoria)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
-    FOREIGN KEY (id_vendedor)
-        REFERENCES vendedores(id_vendedor)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE
+    FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
+    FOREIGN KEY (id_vendedor) REFERENCES vendedores(id_vendedor)
 );
 
 -- ============================
@@ -49,22 +44,13 @@ CREATE TABLE produtos (
 -- ============================
 CREATE TABLE pedidos (
     id_pedido BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    -- Alterado para permitir NULL (necessário para o ON DELETE SET NULL funcionar)
-    id_produto BIGINT UNSIGNED NULL, 
+    id_produto BIGINT UNSIGNED NOT NULL, -- Voltamos para NOT NULL para integridade do histórico
     id_vendedor BIGINT UNSIGNED NOT NULL,
     quantidade INT NOT NULL DEFAULT 1,
     data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    -- Agora, se o produto sumir, o pedido permanece com id_produto = NULL
-    CONSTRAINT fk_pedido_produto
-        FOREIGN KEY (id_produto)
-        REFERENCES produtos(id_produto)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_pedido_vendedor
-        FOREIGN KEY (id_vendedor)
-        REFERENCES vendedores(id_vendedor)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (id_produto) REFERENCES produtos(id_produto),
+    FOREIGN KEY (id_vendedor) REFERENCES vendedores(id_vendedor)
 );
+
+select * from pedidos
