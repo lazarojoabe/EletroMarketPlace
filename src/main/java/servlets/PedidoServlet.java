@@ -1,7 +1,6 @@
 package servlets;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,123 +12,72 @@ import model.Pedido;
 
 @WebServlet("/pedido")
 public class PedidoServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
     private PedidoDAO pedidoDAO;
 
     @Override
     public void init() throws ServletException {
-        super.init();
         this.pedidoDAO = new PedidoDAO();
     }
 
-    @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        super.service(request, response);
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-    }
-
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
         String idParam = request.getParameter("id_pedido");
         if (idParam != null && !idParam.isEmpty()) {
-            buscarPorId(request, response, idParam);
+            try {
+                Pedido p = pedidoDAO.buscarPorId(Long.parseLong(idParam));
+                if (p != null) {
+                    request.setAttribute("pedidoEncontrado", p);
+                    request.getRequestDispatcher("resultadoBuscaPedido.jsp").forward(request, response);
+                } else {
+                    request.setAttribute("erro", "Pedido não encontrado.");
+                    request.getRequestDispatcher("erro.jsp").forward(request, response);
+                }
+            } catch (Exception e) {
+                request.setAttribute("erro", "Erro ao processar busca.");
+                request.getRequestDispatcher("erro.jsp").forward(request, response);
+            }
         } else {
-            listarTodos(request, response);
+            List<Pedido> lista = pedidoDAO.listarTodos();
+            request.setAttribute("listaPedidos", lista);
+            request.getRequestDispatcher("listaPedidos.jsp").forward(request, response);
         }
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
         String action = request.getParameter("action");
-        String mensagem = "";
+        boolean sucesso = false;
+        String msg = "";
+
         try {
-            if (action != null) {
-                switch (action) {
-                    case "insert": mensagem = inserirPedido(request); break;
-                    case "update": mensagem = atualizarPedido(request); break;
-                    case "delete": mensagem = removerPedido(request); break;
-                }
+            if ("insert".equals(action)) {
+                Pedido p = new Pedido();
+                p.setIdProduto(Long.parseLong(request.getParameter("id_produto")));
+                p.setIdVendedor(Long.parseLong(request.getParameter("id_vendedor")));
+                p.setQuantidade(Integer.parseInt(request.getParameter("quantidade")));
+                // Lógica de inserção no DAO...
+                sucesso = pedidoDAO.inserir(p);
+                msg = "Pedido registrado com sucesso!";
+            } else if ("update".equals(action)) {
+                Pedido p = new Pedido();
+                p.setIdPedido(Long.parseLong(request.getParameter("id_pedido")));
+                p.setQuantidade(Integer.parseInt(request.getParameter("quantidade")));
+                // Outros campos de status...
+                sucesso = pedidoDAO.atualizar(p);
+                msg = "Pedido atualizado!";
+            } else if ("delete".equals(action)) {
+                sucesso = pedidoDAO.remover(Long.parseLong(request.getParameter("id_pedido")));
+                msg = "Pedido cancelado!";
             }
-        } catch (Exception e) { mensagem = "Erro: " + e.getMessage(); }
-        response.getWriter().println("<h3>Resultado:</h3><p>" + mensagem + "</p><a href='/EletroMarketPlace/pedido.html'>Voltar</a>");
-    }
 
-    private void buscarPorId(HttpServletRequest request, HttpServletResponse response, String idParam) throws IOException {
-        try {
-            Long id = Long.parseLong(idParam);
-            Pedido p = pedidoDAO.buscarPorId(id);
-            if (p != null) {
-                response.getWriter().println("<h2>Pedido #" + p.getIdPedido() + "</h2>");
-            } else { response.getWriter().println("Pedido ID " + id + " não encontrado."); }
-        } catch (Exception e) { response.getWriter().println("Erro."); }
-    }
-
-    private void listarTodos(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        List<Pedido> lista = pedidoDAO.listarTodos();
-        PrintWriter out = response.getWriter();
-        
-        out.println("<!DOCTYPE html><html><head><title>Relatório de Pedidos</title>");
-        out.println("<style>");
-        out.println("body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #eef3f7; padding: 40px; }");
-        out.println(".container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-width: 1050px; margin: auto; }");
-        out.println("h2 { color: #0077c7; margin-bottom: 20px; }");
-        out.println("table { width: 100%; border-collapse: collapse; }");
-        out.println("th { background: #f8f9fa; color: #0077c7; padding: 15px; text-align: left; border-bottom: 3px solid #0077c7; text-transform: uppercase; font-size: 12px; }");
-        out.println("td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; color: #2c3e50; }");
-        out.println("tr:nth-child(even) { background: #fafafa; }");
-        out.println("tr:hover { background: #f1f7fc; }");
-        out.println(".btn-nav { display: block; margin-top: 25px; text-align: center; color: #0077c7; text-decoration: none; font-weight: bold; }");
-        out.println(".null-info { color: #95a5a6; font-style: italic; font-size: 12px; }");
-        out.println("</style></head><body>");
-        
-        out.println("<div class='container'><h2>Relatório Geral de Vendas</h2>");
-        out.println("<table><thead><tr>");
-        out.println("<th>ID Pedido</th><th>Produto</th><th>Vendedor</th><th>Quantidade</th><th>Data do Registro</th>");
-        out.println("</tr></thead><tbody>");
-
-        for (Pedido p : lista) {
-            // Lógica para tratar produtos ou vendedores deletados (SET NULL)
-            String nomeProd = (p.getNomeProduto() != null) ? p.getNomeProduto() : "<span class='null-info'>Produto Removido</span>";
-            String nomeVend = (p.getNomeVendedor() != null) ? p.getNomeVendedor() : "<span class='null-info'>Vendedor Inativo</span>";
-
-            out.println("<tr>");
-            out.println("<td><strong>#" + p.getIdPedido() + "</strong></td>");
-            out.println("<td>" + nomeProd + "</td>");
-            out.println("<td>" + nomeVend + "</td>");
-            out.println("<td>" + p.getQuantidade() + "</td>");
-            out.println("<td>" + p.getDataPedido() + "</td>");
-            out.println("</tr>");
+            if (sucesso) {
+                request.setAttribute("mensagem", msg);
+                request.getRequestDispatcher("sucesso.jsp").forward(request, response);
+            } else {
+                request.setAttribute("erro", "Falha na operação de pedidos.");
+                request.getRequestDispatcher("erro.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            request.setAttribute("erro", "Erro: " + e.getMessage());
+            request.getRequestDispatcher("erro.jsp").forward(request, response);
         }
-
-        out.println("</tbody></table>");
-        out.println("<a href='pedido.html' class='btn-nav'>Voltar ao Gerenciamento</a>");
-        out.println("</div></body></html>");
-    }
-
-    private String inserirPedido(HttpServletRequest request) {
-        Pedido p = new Pedido();
-        p.setIdProduto(Long.parseLong(request.getParameter("id_produto")));
-        p.setIdVendedor(Long.parseLong(request.getParameter("id_vendedor")));
-        p.setQuantidade(Integer.parseInt(request.getParameter("quantidade")));
-        return pedidoDAO.inserir(p) ? "Pedido inserido com sucesso! ID: " + p.getIdPedido() : "Falha ao inserir pedido.";
-    }
-
-    private String atualizarPedido(HttpServletRequest request) {
-        Long id = Long.parseLong(request.getParameter("id_pedido"));
-        Pedido p = pedidoDAO.buscarPorId(id);
-        if (p == null) return "Erro: Pedido ID " + id + " não existe.";
-        p.setQuantidade(Integer.parseInt(request.getParameter("quantidade")));
-        return pedidoDAO.atualizar(p) ? "Pedido ID " + id + " atualizado com sucesso!" : "Falha ao atualizar ID " + id;
-    }
-
-    private String removerPedido(HttpServletRequest request) {
-        Long id = Long.parseLong(request.getParameter("id_pedido"));
-        return pedidoDAO.remover(id) ? "Pedido ID " + id + " removido com sucesso!" : "Falha ao remover ID " + id;
     }
 }
