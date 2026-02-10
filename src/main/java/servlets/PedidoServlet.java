@@ -8,7 +8,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import dao.PedidoDAO;
+import dao.ProdutoDAO;
+import dao.VendedorDAO;
 import model.Pedido;
+import model.Produto;
+import model.Vendedor;
 
 @WebServlet("/pedido")
 public class PedidoServlet extends HttpServlet {
@@ -48,15 +52,35 @@ public class PedidoServlet extends HttpServlet {
         String msg = "";
 
         try {
-            if ("insert".equals(action)) {
-                Pedido p = new Pedido();
-                p.setIdProduto(Long.parseLong(request.getParameter("id_produto")));
-                p.setIdVendedor(Long.parseLong(request.getParameter("id_vendedor")));
-                p.setQuantidade(Integer.parseInt(request.getParameter("quantidade")));
-                // Lógica de inserção no DAO...
-                sucesso = pedidoDAO.inserir(p);
-                msg = "Pedido registrado com sucesso!";
-            } else if ("update".equals(action)) {
+        	if ("insert".equals(action)) {
+        	    Long idProd = Long.parseLong(request.getParameter("id_produto"));
+        	    Long idVend = Long.parseLong(request.getParameter("id_vendedor"));
+        	    
+        	    // 1. Instanciar os DAOs para verificação
+        	    ProdutoDAO prodDAO = new ProdutoDAO();
+        	    VendedorDAO vendDAO = new VendedorDAO();
+        	    
+        	    // 2. Buscar as entidades (o buscarPorId já filtra por ativo=true no seu DAO refatorado)
+        	    Produto p = prodDAO.buscarPorId(idProd);
+        	    Vendedor v = vendDAO.buscarPorId(idVend);
+        	    
+        	    // 3. Validar se ambos estão ativos/existentes
+        	    if (p != null && v != null) {
+        	        Pedido novoPedido = new Pedido();
+        	        novoPedido.setIdProduto(idProd);
+        	        novoPedido.setIdVendedor(idVend);
+        	        novoPedido.setQuantidade(Integer.parseInt(request.getParameter("quantidade")));
+        	        
+        	        if (pedidoDAO.inserir(novoPedido)) {
+        	            request.setAttribute("mensagem", "Pedido realizado com sucesso!");
+        	            request.getRequestDispatcher("sucesso.jsp").forward(request, response);
+        	        }
+        	    } else {
+        	        // Caso um deles esteja inativo (Soft Delete) ou não exista
+        	        request.setAttribute("erro", "Não é possível realizar o pedido: Produto ou Vendedor inativo ou inexistente.");
+        	        request.getRequestDispatcher("erro.jsp").forward(request, response);
+        	    }
+        	} else if ("update".equals(action)) {
                 Pedido p = new Pedido();
                 p.setIdPedido(Long.parseLong(request.getParameter("id_pedido")));
                 p.setQuantidade(Integer.parseInt(request.getParameter("quantidade")));

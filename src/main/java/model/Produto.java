@@ -11,7 +11,9 @@ public class Produto {
     private Long idCategoria;
     private Long idVendedor;
     private Timestamp dataCadastro;
+    private boolean ativo; // Nova flag para Soft Delete
 
+   
     public Produto() {}
 
     public Produto(String nome, String descricao, double preco, int estoque, Long idCategoria, Long idVendedor) {
@@ -46,6 +48,8 @@ public class Produto {
 
     public Timestamp getDataCadastro() { return dataCadastro; }
     public void setDataCadastro(Timestamp dataCadastro) { this.dataCadastro = dataCadastro; }
+    public boolean isAtivo() { return ativo; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
 
     @Override
     public String toString() {

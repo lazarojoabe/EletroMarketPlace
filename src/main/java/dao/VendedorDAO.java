@@ -9,8 +9,9 @@ import java.util.List;
 
 public class VendedorDAO {
 
+    // Adicionado o campo 'ativo' na inserção
     public boolean inserir(Vendedor vendedor) {
-        String sql = "INSERT INTO vendedores (nome, email) VALUES (?, ?)";
+        String sql = "INSERT INTO vendedores (nome, email, ativo) VALUES (?, ?, true)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -30,8 +31,9 @@ public class VendedorDAO {
         return false;
     }
 
+    // Busca apenas se o vendedor estiver ativo
     public Vendedor buscarPorId(Long id) {
-        String sql = "SELECT * FROM vendedores WHERE id_vendedor = ?";
+        String sql = "SELECT * FROM vendedores WHERE id_vendedor = ? AND ativo = true";
         Vendedor v = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -53,8 +55,9 @@ public class VendedorDAO {
         return v;
     }
 
+    // Busca apenas se o vendedor estiver ativo
     public Vendedor buscarPorEmail(String email) {
-        String sql = "SELECT * FROM vendedores WHERE email = ?";
+        String sql = "SELECT * FROM vendedores WHERE email = ? AND ativo = true";
         Vendedor v = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -77,7 +80,7 @@ public class VendedorDAO {
     }
 
     public boolean atualizar(Vendedor vendedor) {
-        String sql = "UPDATE vendedores SET nome = ?, email = ? WHERE id_vendedor = ?";
+        String sql = "UPDATE vendedores SET nome = ?, email = ? WHERE id_vendedor = ? AND ativo = true";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -94,8 +97,12 @@ public class VendedorDAO {
         return false;
     }
 
+    /**
+     * MUDANÇA PARA SOFT DELETE
+     * Atualiza a flag 'ativo' para falso em vez de deletar o registro
+     */
     public boolean remover(Long id) {
-        String sql = "DELETE FROM vendedores WHERE id_vendedor = ?";
+        String sql = "UPDATE vendedores SET ativo = false WHERE id_vendedor = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -109,8 +116,9 @@ public class VendedorDAO {
         return false;
     }
 
+    // Lista apenas vendedores que não foram "excluídos" logicamente
     public List<Vendedor> listarTodos() {
-        String sql = "SELECT * FROM vendedores ORDER BY nome";
+        String sql = "SELECT * FROM vendedores WHERE ativo = true ORDER BY nome";
         List<Vendedor> lista = new ArrayList<>();
 
         try (Connection conn = ConnectionFactory.getConnection();

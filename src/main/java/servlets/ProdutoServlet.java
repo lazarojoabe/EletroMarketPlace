@@ -7,8 +7,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import dao.CategoriaDAO;
 import dao.ProdutoDAO;
+import dao.VendedorDAO;
+import model.Categoria;
 import model.Produto;
+import model.Vendedor;
 
 @WebServlet("/produto")
 public class ProdutoServlet extends HttpServlet {
@@ -52,15 +57,28 @@ public class ProdutoServlet extends HttpServlet {
 
         try {
             if ("insert".equals(action)) {
-                Produto p = new Produto();
-                p.setNome(request.getParameter("nome"));
-                p.setDescricao(request.getParameter("descricao"));
-                p.setPreco(Double.parseDouble(request.getParameter("preco")));
-                p.setEstoque(Integer.parseInt(request.getParameter("estoque")));
-                p.setIdCategoria(Long.parseLong(request.getParameter("id_categoria")));
-                p.setIdVendedor(Long.parseLong(request.getParameter("id_vendedor")));
-                sucesso = produtoDAO.inserir(p);
-                mensagem = "Produto inserido com sucesso!";
+            		Long idCat = Long.parseLong(request.getParameter("id_categoria"));
+            		Long idVend = Long.parseLong(request.getParameter("id_vendedor"));
+                CategoriaDAO catDAO = new CategoriaDAO();
+                VendedorDAO vendDAO = new VendedorDAO();
+                Categoria c = catDAO.buscarPorId(idCat);
+                Vendedor v = vendDAO.buscarPorId(idVend);
+                
+                if (c != null && v != null) {
+                		Produto p = new Produto();
+                    p.setNome(request.getParameter("nome"));
+                    p.setDescricao(request.getParameter("descricao"));
+                    p.setPreco(Double.parseDouble(request.getParameter("preco")));
+                    p.setEstoque(Integer.parseInt(request.getParameter("estoque")));
+                    p.setIdCategoria(Long.parseLong(request.getParameter("id_categoria")));
+                    p.setIdVendedor(Long.parseLong(request.getParameter("id_vendedor")));
+                    sucesso = produtoDAO.inserir(p);
+                    mensagem = "Produto inserido com sucesso!";
+                } else {
+                    request.setAttribute("erro", "Erro: A categoria ou vendedor selecionado(a) está inativo(a) ou não existe.");
+                    request.getRequestDispatcher("erro.jsp").forward(request, response);
+                }
+                
             } else if ("update".equals(action)) {
                 Long id = Long.parseLong(request.getParameter("id_produto"));
                 Produto p = new Produto();

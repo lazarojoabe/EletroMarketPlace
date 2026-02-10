@@ -9,8 +9,9 @@ import java.util.List;
 
 public class CategoriaDAO {
 
+ 
     public boolean inserir(Categoria categoria) {
-        String sql = "INSERT INTO categorias (nome) VALUES (?)";
+        String sql = "INSERT INTO categorias (nome, ativo) VALUES (?, true)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -28,8 +29,9 @@ public class CategoriaDAO {
         return false;
     }
 
+    // Busca apenas se a categoria estiver ativa
     public Categoria buscarPorId(Long id) {
-        String sql = "SELECT * FROM categorias WHERE id_categoria = ?";
+        String sql = "SELECT * FROM categorias WHERE id_categoria = ? AND ativo = true";
         Categoria c = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -50,7 +52,7 @@ public class CategoriaDAO {
     }
 
     public boolean atualizar(Categoria categoria) {
-        String sql = "UPDATE categorias SET nome = ? WHERE id_categoria = ?";
+        String sql = "UPDATE categorias SET nome = ? WHERE id_categoria = ? AND ativo = true";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -66,8 +68,12 @@ public class CategoriaDAO {
         return false;
     }
 
+    /**
+     * MUDANÇA PARA SOFT DELETE
+     * Em vez de apagar o registro, apenas marcamos como inativo.
+     */
     public boolean remover(Long id) {
-        String sql = "DELETE FROM categorias WHERE id_categoria = ?";
+        String sql = "UPDATE categorias SET ativo = false WHERE id_categoria = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -82,8 +88,9 @@ public class CategoriaDAO {
         return false;
     }
 
+    // Lista apenas as categorias ativas para o usuário final
     public List<Categoria> listarTodas() {
-        String sql = "SELECT * FROM categorias";
+        String sql = "SELECT * FROM categorias WHERE ativo = true";
         List<Categoria> lista = new ArrayList<>();
 
         try (Connection conn = ConnectionFactory.getConnection();

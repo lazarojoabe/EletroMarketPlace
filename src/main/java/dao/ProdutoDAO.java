@@ -9,8 +9,9 @@ import java.util.List;
 
 public class ProdutoDAO {
 
+    // Adicionado o campo 'ativo' na inserção
     public boolean inserir(Produto produto) {
-        String sql = "INSERT INTO produtos (nome, descricao, preco, estoque, id_categoria, id_vendedor) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO produtos (nome, descricao, preco, estoque, id_categoria, id_vendedor, ativo) VALUES (?, ?, ?, ?, ?, ?, true)";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -34,8 +35,9 @@ public class ProdutoDAO {
         return false;
     }
 
+    // Busca apenas se o produto estiver ativo
     public Produto buscarPorId(Long id) {
-        String sql = "SELECT * FROM produtos WHERE id_produto = ?";
+        String sql = "SELECT * FROM produtos WHERE id_produto = ? AND ativo = true";
         Produto p = null;
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -45,7 +47,14 @@ public class ProdutoDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                p = extrairProduto(rs);
+                p = new Produto();
+                p.setIdProduto(rs.getLong("id_produto"));
+                p.setNome(rs.getString("nome"));
+                p.setDescricao(rs.getString("descricao"));
+                p.setPreco(rs.getDouble("preco"));
+                p.setEstoque(rs.getInt("estoque"));
+                p.setIdCategoria(rs.getLong("id_categoria"));
+                p.setIdVendedor(rs.getLong("id_vendedor"));
             }
 
         } catch (SQLException e) {
@@ -55,7 +64,7 @@ public class ProdutoDAO {
     }
 
     public boolean atualizar(Produto produto) {
-        String sql = "UPDATE produtos SET nome = ?, descricao = ?, preco = ?, estoque = ?, id_categoria = ?, id_vendedor = ? WHERE id_produto = ?";
+        String sql = "UPDATE produtos SET nome = ?, descricao = ?, preco = ?, estoque = ?, id_categoria = ?, id_vendedor = ? WHERE id_produto = ? AND ativo = true";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -76,25 +85,12 @@ public class ProdutoDAO {
         return false;
     }
 
-    public boolean atualizarEstoque(Long id, int novoEstoque) {
-        String sql = "UPDATE produtos SET estoque = ? WHERE id_produto = ?";
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, novoEstoque);
-            stmt.setLong(2, id);
-
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao atualizar estoque: " + e.getMessage());
-        }
-        return false;
-    }
-
+    /**
+     * MUDANÇA PARA SOFT DELETE
+     * Desativa o produto para que os pedidos antigos não percam a referência
+     */
     public boolean remover(Long id) {
-        String sql = "DELETE FROM produtos WHERE id_produto = ?";
+        String sql = "UPDATE produtos SET ativo = false WHERE id_produto = ?";
 
         try (Connection conn = ConnectionFactory.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -108,8 +104,9 @@ public class ProdutoDAO {
         return false;
     }
 
+    // Lista apenas produtos ativos no estoque
     public List<Produto> listarTodos() {
-        String sql = "SELECT * FROM produtos";
+        String sql = "SELECT * FROM produtos WHERE ativo = true ORDER BY nome";
         List<Produto> lista = new ArrayList<>();
 
         try (Connection conn = ConnectionFactory.getConnection();
@@ -117,65 +114,18 @@ public class ProdutoDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                lista.add(extrairProduto(rs));
+                Produto p = new Produto();
+                p.setIdProduto(rs.getLong("id_produto"));
+                p.setNome(rs.getString("nome"));
+                p.setDescricao(rs.getString("descricao"));
+                p.setPreco(rs.getDouble("preco"));
+                p.setEstoque(rs.getInt("estoque"));
+                lista.add(p);
             }
 
         } catch (SQLException e) {
             System.err.println("Erro ao listar produtos: " + e.getMessage());
         }
         return lista;
-    }
-
-    public List<Produto> listarPorCategoria(Long idCategoria) {
-        String sql = "SELECT * FROM produtos WHERE id_categoria = ?";
-        List<Produto> lista = new ArrayList<>();
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setLong(1, idCategoria);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                lista.add(extrairProduto(rs));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao listar produtos por categoria: " + e.getMessage());
-        }
-        return lista;
-    }
-
-    public List<Produto> listarPorVendedor(Long idVendedor) {
-        String sql = "SELECT * FROM produtos WHERE id_vendedor = ?";
-        List<Produto> lista = new ArrayList<>();
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setLong(1, idVendedor);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                lista.add(extrairProduto(rs));
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erro ao listar produtos por vendedor: " + e.getMessage());
-        }
-        return lista;
-    }
-
-    private Produto extrairProduto(ResultSet rs) throws SQLException {
-        Produto p = new Produto();
-        p.setIdProduto(rs.getLong("id_produto"));
-        p.setNome(rs.getString("nome"));
-        p.setDescricao(rs.getString("descricao"));
-        p.setPreco(rs.getDouble("preco"));
-        p.setEstoque(rs.getInt("estoque"));
-        p.setIdCategoria(rs.getLong("id_categoria"));
-        p.setIdVendedor(rs.getLong("id_vendedor"));
-        p.setDataCadastro(rs.getTimestamp("data_cadastro"));
-        return p;
     }
 }
